@@ -1,0 +1,10 @@
+daemon=1
+rpcuser=kadenarpc
+rpcpassword=securepassword
+rpcport=9466
+server=1
+listen=1
+txindex=1
+addressindex=1
+timestampindex=1
+spentindex=1
