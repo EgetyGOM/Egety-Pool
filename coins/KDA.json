@@ -1,0 +1,7 @@
+{
+    "name": "Kadena",
+    "symbol": "KDA",
+    "algorithm": "chainweb",
+    "peerMagic": "bc611086",
+    "peerMagicTestnet": "25e927ba"
+}
