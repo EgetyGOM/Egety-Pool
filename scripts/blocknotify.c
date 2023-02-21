@@ -7,26 +7,16 @@
 #include <errno.h>
 
 /*
-
 Contributed by Alex Petrov aka SysMan at sysman.net
 Updated by Alejandro Reyero - TodoJuegos.com
-
 Part of NOMP project
 Simple lightweight & fast - a more efficient block notify script in pure C.
-
 (may also work as coin switch)
-
 Platforms : Linux, BSD, Solaris (mostly OS independent)
-
 Build with:
     gcc blocknotify.c -o blocknotify
-
-
 Example usage in daemon coin.conf using default NOMP CLI port of 17117
     blocknotify="/bin/blocknotify 127.0.0.1:17117 dogecoin %s"
-
-
-
 */
 
 
@@ -40,10 +30,10 @@ int main(int argc, char **argv)
     char *p, *arg, *errptr;
     int port;
 
-    if (argc < 3)
+    if (argc < 4)
     {
         // print help
-        printf("NOMP pool block notify\n usage: <host:port> <coin> <block>\n");
+        printf("NOMP pool block notify\n usage: <host:port> <coin> <block> <pool>\n");
         exit(1);
     }
 
@@ -62,23 +52,31 @@ int main(int argc, char **argv)
             fprintf(stderr, "port number fail [%s]\n", errptr);
         }
 
-	}
+    }
 
-	snprintf(sendline, sizeof(sendline) - 1, "{\"command\":\"blocknotify\",\"params\":[\"%s\",\"%s\"]}\n", argv[2], argv[3]);
+    // Modify the sendline based on the pool and coin
+    if (strcmp(argv[4], "pool1") == 0) {
+        snprintf(sendline, sizeof(sendline) - 1, "{\"command\":\"blocknotify\",\"params\":[\"%s\",\"%s\"]}\n", "coin1", argv[3]);
+    } else if (strcmp(argv[4], "pool2") == 0) {
+        snprintf(sendline, sizeof(sendline) - 1, "{\"command\":\"blocknotify\",\"params\":[\"%s\",\"%s\"]}\n", "coin2", argv[3]);
+    } else {
+        fprintf(stderr, "Invalid pool specified\n");
+        exit(1);
+    }
 
-	sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	bzero(&servaddr, sizeof(servaddr));
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = inet_addr(host);
-	servaddr.sin_port = htons(port);
-	connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
+    sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = inet_addr(host);
+    servaddr.sin_port = htons(port);
+    connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 
-	int result = send(sockfd, sendline, strlen(sendline), 0);
-	close(sockfd);
+    int result = send(sockfd, sendline, strlen(sendline), 0);
+    close(sockfd);
 
-	if(result == -1) {
-		printf("Error sending: %i\n", errno);
+    if(result == -1) {
+        printf("Error sending: %i\n", errno);
         exit(-1);
-	}
-	exit(0);
+    }
+    exit(0);
 }
